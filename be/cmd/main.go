@@ -1,49 +1,43 @@
 package main
 
 import (
-	_ "example.com/m/v2/docs" // Import generated docs
+	"context"
+	"os"
+
+	_ "example.com/m/v2/docs"
+	"example.com/m/v2/internal/services"
+	"go.uber.org/zap"
+
+	logger "example.com/m/v2/internal/pkg"
+
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title AI Tools API
-// @version 1.0
-// @description This is the AI Tools API server.
-// @termsOfService http://swagger.io/terms/
-
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
-
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @host localhost:8080
-// @BasePath /
-// @schemes http
-
-// HealthCheck godoc
-// @Summary Health check endpoint
-// @Description Check if the API is running
-// @Tags health
-// @Accept json
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Router /healthz [get]
-func healthCheck(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "OK",
-	})
-}
-
 func main() {
+	logger.Init(false)
+
+	if err := godotenv.Load(); err != nil {
+		logger.Error(context.Background(), "Warning: .env file could not be loaded:", zap.Error(err))
+	}
+
+	difyBaseURL := "https://api.dify.ai/v1/workflows/run"
+	difyContextualAPIKey := os.Getenv("DIFY_CONTEXTUAL_API_KEY")
+
+	difyService := services.NewDifyService(difyBaseURL, difyContextualAPIKey)
+
 	router := gin.Default()
 
 	// Health check endpoint
-	router.GET("/healthz", healthCheck)
+	router.GET("/healthz", HealthCheck)
 
-	// Swagger documentation endpoint
+	// Contextualize link endpoint
+	router.GET("/contextualize-link", func(c *gin.Context) {
+		ContextualizeLinkHandler(c, difyService)
+	})
+
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.Run(":8080")

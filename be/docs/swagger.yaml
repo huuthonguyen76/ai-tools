@@ -1,18 +1,38 @@
-basePath: /
-host: localhost:8080
 info:
-  contact:
-    email: support@swagger.io
-    name: API Support
-    url: http://www.swagger.io/support
-  description: This is the AI Tools API server.
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
-  title: AI Tools API
-  version: "1.0"
+  contact: {}
 paths:
+  /contextualize-link:
+    get:
+      consumes:
+      - application/json
+      description: Get contextualized version of a link using AI
+      parameters:
+      - description: URL to contextualize
+        in: query
+        name: link
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Contextualize a link
+      tags:
+      - contextualize
   /healthz:
     get:
       consumes:
@@ -29,6 +49,4 @@ paths:
       summary: Health check endpoint
       tags:
       - health
-schemes:
-- http
 swagger: "2.0"
