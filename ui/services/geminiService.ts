@@ -1,7 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { ContextualizedResult } from "../types";
 
-const API_KEY = 'AIzaSyD_n2aNHcNAcHQMmJgSu71cOfKiWiVoBEI';
 
 export const generateLinkContext = async (url: string): Promise<ContextualizedResult> => {
   if (!API_KEY) {
