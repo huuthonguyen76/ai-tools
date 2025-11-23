@@ -69,8 +69,6 @@ func (s *DifyService) callDify(payload map[string]interface{}) (*DifyResponse, e
 		return nil, err
 	}
 
-	logger.Info(context.Background(), "resp: ", zap.Any("resp", resp.Body))
-
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err

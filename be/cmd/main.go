@@ -5,6 +5,8 @@ import (
 	"os"
 
 	_ "example.com/m/v2/docs"
+	contextualizelink "example.com/m/v2/internal/components/contextualize_link"
+	"example.com/m/v2/internal/repositories"
 	"example.com/m/v2/internal/services"
 	"go.uber.org/zap"
 
@@ -28,6 +30,16 @@ func main() {
 
 	difyService := services.NewDifyService(difyBaseURL, difyContextualAPIKey)
 
+	supabaseClient, err := services.NewSupabaseClient(os.Getenv("SUPABASE_URL"), os.Getenv("SUPABASE_PRIVATE_API_KEY"))
+	if err != nil {
+		logger.Error(context.Background(), "Error: failed to initialize supabase client:", zap.Error(err))
+		os.Exit(1)
+	}
+
+	contextualLinkRepository := repositories.NewContextualLinkRepository(supabaseClient)
+
+	contextualizeLinkHandler := contextualizelink.NewContextualizeLinkHandler(difyService, contextualLinkRepository)
+
 	router := gin.Default()
 
 	// Health check endpoint
@@ -35,7 +47,7 @@ func main() {
 
 	// Contextualize link endpoint
 	router.GET("/contextualize-link", func(c *gin.Context) {
-		ContextualizeLinkHandler(c, difyService)
+		ContextualizeLinkHandler(c, contextualizeLinkHandler)
 	})
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

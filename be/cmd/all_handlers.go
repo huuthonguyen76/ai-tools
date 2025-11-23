@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	_ "example.com/m/v2/docs"
-	"example.com/m/v2/internal/services"
 	"go.uber.org/zap"
 
+	contextualizelink "example.com/m/v2/internal/components/contextualize_link"
 	logger "example.com/m/v2/internal/pkg"
 	"github.com/gin-gonic/gin"
 )
@@ -52,7 +52,7 @@ func HealthCheck(c *gin.Context) {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /contextualize-link [get]
-func ContextualizeLinkHandler(c *gin.Context, difyService *services.DifyService) {
+func ContextualizeLinkHandler(c *gin.Context, contextualHandler *contextualizelink.ContextualizeLinkHandler) {
 	ctx := c.Request.Context()
 
 	link := c.Query("link")
@@ -66,7 +66,7 @@ func ContextualizeLinkHandler(c *gin.Context, difyService *services.DifyService)
 
 	logger.Info(ctx, "link: ", zap.String("link", link))
 
-	contextualizedLink, err := difyService.GetContextualLink(link)
+	contextualizedLink, err := contextualHandler.Handler(link)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

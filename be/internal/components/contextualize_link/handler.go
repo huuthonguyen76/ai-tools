@@ -3,15 +3,20 @@ package contextualizelink
 import (
 	"errors"
 
+	"example.com/m/v2/internal/repositories"
 	"example.com/m/v2/internal/services"
 )
 
 type ContextualizeLinkHandler struct {
-	DifyService *services.DifyService
+	DifyService              *services.DifyService
+	ContextualLinkRepository *repositories.ContextualLinkRepository
 }
 
-func NewContextualizeLinkHandler(difyService *services.DifyService) *ContextualizeLinkHandler {
-	return &ContextualizeLinkHandler{DifyService: difyService}
+func NewContextualizeLinkHandler(difyService *services.DifyService, contextualLinkRepository *repositories.ContextualLinkRepository) *ContextualizeLinkHandler {
+	return &ContextualizeLinkHandler{
+		DifyService:              difyService,
+		ContextualLinkRepository: contextualLinkRepository,
+	}
 }
 
 func (h *ContextualizeLinkHandler) Handler(link string) (string, error) {
@@ -20,6 +25,11 @@ func (h *ContextualizeLinkHandler) Handler(link string) (string, error) {
 	}
 
 	contextualizedLink, err := h.DifyService.GetContextualLink(link)
+	if err != nil {
+		return "", err
+	}
+
+	err = h.ContextualLinkRepository.Upsert(link, contextualizedLink)
 	if err != nil {
 		return "", err
 	}
