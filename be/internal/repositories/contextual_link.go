@@ -43,6 +43,25 @@ func (r *ContextualLinkRepository) FindByLink(link string) (*ContextualLink, err
 	return &data[0], nil
 }
 
+func (r *ContextualLinkRepository) FindByContextualizedLink(contextualizedLink string) (*ContextualLink, error) {
+	var data []ContextualLink
+
+	count, err := r.Client.From("contextual-links").
+		Select("*", "exact", false).
+		Eq("contextualized_link", contextualizedLink).
+		ExecuteTo(&data)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to query contextualized link: %w", err)
+	}
+
+	if count == 0 {
+		return nil, nil
+	}
+
+	return &data[0], nil
+}
+
 func (r *ContextualLinkRepository) Create(link, contextualizedLink string) error {
 	if link == "" {
 		return errors.New("link cannot be empty")

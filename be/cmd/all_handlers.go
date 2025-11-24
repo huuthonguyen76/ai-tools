@@ -7,6 +7,8 @@ import (
 	"go.uber.org/zap"
 
 	contextualizelink "example.com/m/v2/internal/components/contextualize_link"
+	redirecturl "example.com/m/v2/internal/components/redirect_url"
+	"example.com/m/v2/internal/pkg"
 	logger "example.com/m/v2/internal/pkg"
 	"github.com/gin-gonic/gin"
 )
@@ -80,4 +82,43 @@ func ContextualizeLinkHandler(c *gin.Context, contextualHandler *contextualizeli
 		"contextualized_link": contextualizedLink,
 	})
 
+}
+
+// RedirectURLHandler is the HTTP handler for redirecting contextualized links to original URLs.
+// @Summary Redirect to original URL
+// @Description Receives a contextualized link and redirects to the original URL
+// @Tags redirect
+// @Accept json
+// @Produce json
+// @Param contextualizedLink query string true "Contextualized link to redirect"
+// @Success 302 {string} string "Redirect to original URL"
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /redirect [get]
+func RedirectURLHandler(c *gin.Context, redirectHandler *redirecturl.RedirectURLHandler) {
+	ctx := c.Request.Context()
+
+	responseFormat := pkg.NewResponseFormat(ctx, http.StatusInternalServerError, "", nil)
+
+	contextualizedLink := c.Query("contextualizedLink")
+
+	if contextualizedLink == "" {
+		responseFormat.ErrorMsg = "contextualizedLink query parameter is required"
+		c.JSON(http.StatusBadRequest, responseFormat)
+		return
+	}
+
+	logger.Info(ctx, "contextualizedLink: ", zap.String("contextualizedLink", contextualizedLink))
+
+	originalLink, err := redirectHandler.Handler(contextualizedLink)
+	if err != nil {
+		responseFormat.ErrorMsg = err.Error()
+		c.JSON(http.StatusInternalServerError, responseFormat)
+		return
+	}
+
+	logger.Info(ctx, "redirecting to original link: ", zap.String("originalLink", originalLink))
+
+	c.Redirect(http.StatusFound, originalLink)
 }

@@ -1,4 +1,4 @@
-package logger
+package pkg
 
 import (
 	"context"
@@ -81,8 +81,8 @@ func ContextWithRequestID(ctx context.Context, requestID string) context.Context
 	return context.WithValue(ctx, RequestIDKey, requestID)
 }
 
-// GetTraceID gets the traceID from context
-func GetTraceID(ctx context.Context) string {
+// GetRequestID gets the requestID from context
+func GetRequestID(ctx context.Context) string {
 	requestID, ok := ctx.Value(RequestIDKey).(string)
 	if !ok {
 		return ""

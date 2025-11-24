@@ -6,6 +6,7 @@ import (
 
 	_ "example.com/m/v2/docs"
 	contextualizelink "example.com/m/v2/internal/components/contextualize_link"
+	redirecturl "example.com/m/v2/internal/components/redirect_url"
 	"example.com/m/v2/internal/repositories"
 	"example.com/m/v2/internal/services"
 	"go.uber.org/zap"
@@ -13,10 +14,20 @@ import (
 	logger "example.com/m/v2/internal/pkg"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+func setupRequestID(c *gin.Context) {
+	requestID := c.GetHeader("X-Request-ID")
+	if requestID == "" {
+		requestID = uuid.New().String()
+	}
+	ctx := context.WithValue(c.Request.Context(), logger.RequestIDKey, requestID)
+	c.Request = c.Request.WithContext(ctx)
+}
 
 func main() {
 	logger.Init(false)
@@ -39,8 +50,12 @@ func main() {
 	contextualLinkRepository := repositories.NewContextualLinkRepository(supabaseClient)
 
 	contextualizeLinkHandler := contextualizelink.NewContextualizeLinkHandler(difyService, contextualLinkRepository)
+	redirectURLHandler := redirecturl.NewRedirectURLHandler(contextualLinkRepository)
 
 	router := gin.Default()
+
+	router.Use(gin.Recovery())
+	router.Use(setupRequestID)
 
 	// Health check endpoint
 	router.GET("/healthz", HealthCheck)
@@ -48,6 +63,11 @@ func main() {
 	// Contextualize link endpoint
 	router.GET("/contextualize-link", func(c *gin.Context) {
 		ContextualizeLinkHandler(c, contextualizeLinkHandler)
+	})
+
+	// Redirect URL endpoint
+	router.GET("/redirect", func(c *gin.Context) {
+		RedirectURLHandler(c, redirectURLHandler)
 	})
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

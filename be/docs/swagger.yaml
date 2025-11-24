@@ -49,4 +49,40 @@ paths:
       summary: Health check endpoint
       tags:
       - health
+  /redirect:
+    get:
+      consumes:
+      - application/json
+      description: Receives a contextualized link and redirects to the original URL
+      parameters:
+      - description: Contextualized link to redirect
+        in: query
+        name: contextualizedLink
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirect to original URL
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Redirect to original URL
+      tags:
+      - redirect
 swagger: "2.0"

@@ -48,7 +48,7 @@ func (s *DifyService) callDify(payload map[string]interface{}) (*DifyResponse, e
 	var response DifyResponse
 
 	client := &http.Client{
-		Timeout: 30 * time.Second,
+		Timeout: 120 * time.Second,
 	}
 
 	jsonPayload, err := json.Marshal(payload)
