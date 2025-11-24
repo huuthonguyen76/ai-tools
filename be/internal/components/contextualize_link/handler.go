@@ -33,6 +33,10 @@ func (h *ContextualizeLinkHandler) Handler(link string) (string, error) {
 		return "", err
 	}
 
+	contextualizedLink = strings.TrimPrefix(contextualizedLink, "https://")
+	contextualizedLink = strings.TrimPrefix(contextualizedLink, "http://")
+	contextualizedLink = strings.TrimPrefix(contextualizedLink, "/")
+	contextualizedLink = strings.TrimSuffix(contextualizedLink, "/")
 	contextualizedLink = strings.TrimSpace(contextualizedLink)
 	contextualizedLink = strings.ToLower(contextualizedLink)
 
