@@ -57,12 +57,13 @@ func HealthCheck(c *gin.Context) {
 func ContextualizeLinkHandler(c *gin.Context, contextualHandler *contextualizelink.ContextualizeLinkHandler) {
 	ctx := c.Request.Context()
 
+	response := pkg.NewResponseFormat(ctx, http.StatusOK, "", nil)
+
 	link := c.Query("link")
 
 	if link == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "link query parameter is required",
-		})
+		response.ErrorMsg = "link query parameter is required"
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
@@ -70,38 +71,35 @@ func ContextualizeLinkHandler(c *gin.Context, contextualHandler *contextualizeli
 
 	contextualizedLink, err := contextualHandler.Handler(link)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		response.ErrorMsg = err.Error()
+		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
+	response.Result = map[string]interface{}{"link": link, "contextualized_link": contextualizedLink}
 	logger.Info(ctx, "contextualizedLink: ", zap.String("contextualizedLink", contextualizedLink))
 
-	c.JSON(http.StatusOK, gin.H{
-		"contextualized_link": contextualizedLink,
-	})
+	c.JSON(http.StatusOK, response)
 
 }
 
 // RedirectURLHandler is the HTTP handler for redirecting contextualized links to original URLs.
 // @Summary Redirect to original URL
-// @Description Receives a contextualized link and redirects to the original URL
+// @Description Receives client and contextualized link parameters from URL path and redirects to the original URL
 // @Tags redirect
 // @Accept json
 // @Produce json
-// @Param contextualizedLink query string true "Contextualized link to redirect"
+// @Param client path string true "Client identifier"
+// @Param link path string true "Contextualized link to redirect"
 // @Success 302 {string} string "Redirect to original URL"
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
-// @Router /redirect [get]
-func RedirectURLHandler(c *gin.Context, redirectHandler *redirecturl.RedirectURLHandler) {
+// @Router /redirect/{client}/{link} [get]
+func RedirectURLHandler(c *gin.Context, redirectHandler *redirecturl.RedirectURLHandler, client, contextualizedLink string) {
 	ctx := c.Request.Context()
 
 	responseFormat := pkg.NewResponseFormat(ctx, http.StatusInternalServerError, "", nil)
-
-	contextualizedLink := c.Query("contextualizedLink")
 
 	if contextualizedLink == "" {
 		responseFormat.ErrorMsg = "contextualizedLink query parameter is required"

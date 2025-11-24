@@ -66,8 +66,10 @@ func main() {
 	})
 
 	// Redirect URL endpoint
-	router.GET("/redirect", func(c *gin.Context) {
-		RedirectURLHandler(c, redirectURLHandler)
+	router.GET("/redirect/:client/:link", func(c *gin.Context) {
+		client := c.Param("client")
+		link := c.Param("link")
+		RedirectURLHandler(c, redirectURLHandler, client, link)
 	})
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

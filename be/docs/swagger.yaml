@@ -53,11 +53,17 @@ paths:
     get:
       consumes:
       - application/json
-      description: Receives a contextualized link and redirects to the original URL
+      description: Receives client and contextualized link parameters and redirects
+        to the original URL
       parameters:
+      - description: Client identifier
+        in: query
+        name: client
+        required: true
+        type: string
       - description: Contextualized link to redirect
         in: query
-        name: contextualizedLink
+        name: link
         required: true
         type: string
       produces:

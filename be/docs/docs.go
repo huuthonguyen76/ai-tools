@@ -88,7 +88,7 @@ const docTemplate = `{
         },
         "/redirect": {
             "get": {
-                "description": "Receives a contextualized link and redirects to the original URL",
+                "description": "Receives client and contextualized link parameters and redirects to the original URL",
                 "consumes": [
                     "application/json"
                 ],
@@ -102,8 +102,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Client identifier",
+                        "name": "client",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "Contextualized link to redirect",
-                        "name": "contextualizedLink",
+                        "name": "link",
                         "in": "query",
                         "required": true
                     }

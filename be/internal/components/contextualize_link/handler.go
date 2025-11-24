@@ -2,6 +2,7 @@ package contextualizelink
 
 import (
 	"errors"
+	"strings"
 
 	"example.com/m/v2/internal/repositories"
 	"example.com/m/v2/internal/services"
@@ -25,9 +26,15 @@ func (h *ContextualizeLinkHandler) Handler(link string) (string, error) {
 	}
 
 	contextualizedLink, err := h.DifyService.GetContextualLink(link)
-	if err != nil {
+	if err != nil || contextualizedLink == "" {
+		if contextualizedLink == "" {
+			return "", errors.New("contextualized link is empty")
+		}
 		return "", err
 	}
+
+	contextualizedLink = strings.TrimSpace(contextualizedLink)
+	contextualizedLink = strings.ToLower(contextualizedLink)
 
 	err = h.ContextualLinkRepository.Upsert(link, contextualizedLink)
 	if err != nil {
