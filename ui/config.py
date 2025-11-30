@@ -1,12 +1,12 @@
-"""
-Configuration settings for the AI Tools Streamlit application.
-"""
-
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Backend API Configuration
-BACKEND_API_URL = os.getenv("BACKEND_API_URL", "http://localhost:8080")
-API_TIMEOUT = int(os.getenv("API_TIMEOUT", "30"))  # seconds
+BACKEND_API_URL = os.getenv("DOMAIN_API")
+API_TIMEOUT = 30
 
 # Layout Configuration
 SIDEBAR_WIDTH_PERCENT = 30
@@ -25,12 +25,6 @@ DEFAULT_TOOL = "Link Contextualizer"
 APP_TITLE = "AI Tools"
 APP_ICON = "🤖"
 PAGE_LAYOUT = "wide"
-
-# API Endpoints
-API_ENDPOINTS = {
-    "contextualize_link": "/contextualize-link",
-    "redirect": "/redirect/{client}/{link}",
-}
 
 # Session State Keys
 SESSION_KEYS = {

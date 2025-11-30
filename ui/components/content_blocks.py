@@ -22,12 +22,12 @@ def render_content_blocks(data: Optional[Dict]) -> None:
         # Show placeholder when no data
         st.info("👆 Enter a URL above to see the contextualized results here.")
         return
-    
+
     # Extract result data
-    result = data.get("result", {})
-    original_link = result.get("link", "N/A")
+    result = data
+    original_link = result.get("original_link", "N/A")
     contextualized_link = result.get("contextualized_link", "N/A")
-    
+
     st.markdown("---")
     st.subheader("📊 Results")
     
@@ -58,32 +58,6 @@ def render_content_blocks(data: Optional[Dict]) -> None:
                 if st.button("📋 Copy Contextualized Link", key="copy_contextualized"):
                     st.code(contextualized_link, language=None)
                     st.success("✅ Link ready to copy! Use Ctrl+C / Cmd+C")
-    
-    # Block 3: Metadata and Additional Info
-    st.markdown("---")
-    with st.container():
-        st.markdown("##### 📝 Metadata")
-        
-        col_meta1, col_meta2, col_meta3 = st.columns(3)
-        
-        with col_meta1:
-            st.metric(
-                label="Status",
-                value="✅ Success" if data.get("status_code") == 200 else "❌ Error"
-            )
-        
-        with col_meta2:
-            st.metric(
-                label="Processing Time",
-                value="< 1s"  # Could be enhanced with actual timing data
-            )
-        
-        with col_meta3:
-            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            st.metric(
-                label="Generated At",
-                value=current_time
-            )
     
     # Additional details in expander
     with st.expander("🔍 View Full API Response"):

@@ -1,11 +1,6 @@
-"""
-AI Tools - Main Streamlit Application
-
-A collection of AI-powered tools for various tasks.
-"""
-
 import streamlit as st
 import config
+
 from components.sidebar import render_sidebar
 from components.link_tool import render_link_tool
 from components.content_blocks import render_content_blocks, render_empty_state
@@ -28,12 +23,12 @@ def main():
     
     # Render sidebar and get selected tool
     selected_tool = render_sidebar()
-    
+
     # Main content area
     if selected_tool == "Link Contextualizer":
         # Render link tool
         data = render_link_tool()
-        
+
         # Render content blocks with results
         render_content_blocks(data)
     

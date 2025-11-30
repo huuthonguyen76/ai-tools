@@ -11,7 +11,7 @@ from utils.helpers import (
     display_error,
     display_success
 )
-from services.api_service import APIService, APIException
+from services.api_service import get_contextualized_link
 
 
 def render_link_tool() -> Optional[Dict]:
@@ -61,7 +61,7 @@ def render_link_tool() -> Optional[Dict]:
         st.session_state[config.SESSION_KEYS["link_data"]] = None
         st.session_state[config.SESSION_KEYS["error_message"]] = None
         st.rerun()
-    
+
     # Handle form submission
     if submit_button:
         # Clear previous error
@@ -79,29 +79,21 @@ def render_link_tool() -> Optional[Dict]:
         # Call API
         try:
             with st.spinner("🤖 AI is contextualizing your link..."):
-                api_service = APIService()
-                response = api_service.contextualize_link(link_input)
-                
-                # Store in session state
-                st.session_state[config.SESSION_KEYS["link_data"]] = response
-                
-                # Display success message
-                if response.get("result"):
-                    result = response["result"]
+                try:
+                    d_response = get_contextualized_link("tho", link_input)
+
+                    # Store in session state
+                    st.session_state[config.SESSION_KEYS["link_data"]] = d_response                
+
                     display_success(
                         f"Link successfully contextualized! "
                         f"Check the results below."
                     )
-                    return response
-                else:
+                    return d_response
+                except:
                     display_error("Unexpected response format from API")
                     return None
-                    
-        except APIException as e:
-            error_msg = str(e)
-            st.session_state[config.SESSION_KEYS["error_message"]] = error_msg
-            display_error(error_msg)
-            return None
+
         except Exception as e:
             error_msg = f"Unexpected error: {str(e)}"
             st.session_state[config.SESSION_KEYS["error_message"]] = error_msg
