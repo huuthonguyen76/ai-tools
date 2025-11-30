@@ -13,6 +13,10 @@ import (
 	"go.uber.org/zap"
 )
 
+type DifyServiceInterface interface {
+	GetContextualLink(url string) (string, error)
+}
+
 type DifyService struct {
 	BaseURL string
 	APIKey  string

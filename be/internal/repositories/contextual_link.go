@@ -8,6 +8,13 @@ import (
 	"github.com/supabase-community/supabase-go"
 )
 
+type ContextualLinkRepositoryInterface interface {
+	FindByLink(link string) (*ContextualLink, error)
+	FindByContextualizedLink(contextualizedLink string) (*ContextualLink, error)
+	Create(link, contextualizedLink string) error
+	Upsert(link, contextualizedLink string) error
+}
+
 type ContextualLinkRepository struct {
 	Client *supabase.Client
 }

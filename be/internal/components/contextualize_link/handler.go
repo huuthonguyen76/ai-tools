@@ -9,11 +9,11 @@ import (
 )
 
 type ContextualizeLinkHandler struct {
-	DifyService              *services.DifyService
-	ContextualLinkRepository *repositories.ContextualLinkRepository
+	DifyService              services.DifyServiceInterface
+	ContextualLinkRepository repositories.ContextualLinkRepositoryInterface
 }
 
-func NewContextualizeLinkHandler(difyService *services.DifyService, contextualLinkRepository *repositories.ContextualLinkRepository) *ContextualizeLinkHandler {
+func NewContextualizeLinkHandler(difyService services.DifyServiceInterface, contextualLinkRepository repositories.ContextualLinkRepositoryInterface) *ContextualizeLinkHandler {
 	return &ContextualizeLinkHandler{
 		DifyService:              difyService,
 		ContextualLinkRepository: contextualLinkRepository,

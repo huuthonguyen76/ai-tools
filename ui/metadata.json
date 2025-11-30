@@ -1,5 +1,0 @@
-{
-  "name": "LinkContext AI",
-  "description": "An AI-powered tool that analyzes web links and generates contextualized previews, anchor texts, and social snippets using Google Gemini with Search Grounding.",
-  "requestFramePermissions": []
-}

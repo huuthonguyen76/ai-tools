@@ -6,6 +6,10 @@ import (
 	"github.com/supabase-community/supabase-go"
 )
 
+type SupabaseClientInterface interface {
+	NewClient(API_URL, API_KEY string) (*supabase.Client, error)
+}
+
 func NewSupabaseClient(API_URL, API_KEY string) (*supabase.Client, error) {
 	client, err := supabase.NewClient(API_URL, API_KEY, &supabase.ClientOptions{})
 	if err != nil {

@@ -1,0 +1,15 @@
+# Mockery configuration file
+# Generate mocks for all interfaces in the internal folder
+
+# Global settings
+dir: "internal/mocks"         # Output directory for generated mocks
+filename: "mock_{{.InterfaceName}}.go"  # Naming pattern for mock files
+template: testify
+
+# Package configurations
+packages:
+  example.com/m/v2/internal:
+    config:
+      all: true      # Generate mocks for all interfaces in this package
+      recursive: true
+      pkgname: mocks
