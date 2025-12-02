@@ -1,0 +1,7 @@
+---
+description: Enforces the implementation of unit tests to guarantee code reliability and maintainability, especially within the 'tests' directory.
+globs: **/tests/**/*.*
+---
+- Implement unit tests to ensure code reliability.
+- The unit test (test small unit) should be in `tests/unit_test/` folder.
+- The integration test (real service calling) should be in `tests/integration/` folder.
