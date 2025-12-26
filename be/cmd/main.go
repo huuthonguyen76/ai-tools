@@ -3,9 +3,12 @@ package main
 import (
 	"context"
 	"os"
+	"time"
 
 	_ "example.com/m/v2/docs"
 	contextualizelink "example.com/m/v2/internal/components/contextualize_link"
+	"example.com/m/v2/internal/components/cronjob/classify"
+	syncdatabase "example.com/m/v2/internal/components/cronjob/sync_data"
 	redirecturl "example.com/m/v2/internal/components/redirect_url"
 	"example.com/m/v2/internal/repositories"
 	"example.com/m/v2/internal/services"
@@ -31,9 +34,10 @@ func setupRequestID(c *gin.Context) {
 
 func main() {
 	logger.Init(false)
+	ctx := context.Background()
 
 	if err := godotenv.Load(); err != nil {
-		logger.Error(context.Background(), "Warning: .env file could not be loaded:", zap.Error(err))
+		logger.Error(ctx, "Warning: .env file could not be loaded:", zap.Error(err))
 	}
 
 	difyBaseURL := "https://api.dify.ai/v1/workflows/run"
@@ -43,7 +47,7 @@ func main() {
 
 	supabaseClient, err := services.NewSupabaseClient(os.Getenv("SUPABASE_URL"), os.Getenv("SUPABASE_PRIVATE_API_KEY"))
 	if err != nil {
-		logger.Error(context.Background(), "Error: failed to initialize supabase client:", zap.Error(err))
+		logger.Error(ctx, "Error: failed to initialize supabase client:", zap.Error(err))
 		os.Exit(1)
 	}
 
@@ -51,6 +55,37 @@ func main() {
 
 	contextualizeLinkHandler := contextualizelink.NewContextualizeLinkHandler(difyService, contextualLinkRepository)
 	redirectURLHandler := redirecturl.NewRedirectURLHandler(contextualLinkRepository)
+
+	// Initialize Apify service
+	apifyAPIToken := os.Getenv("APIFY_API_KEY")
+	apifyService, err := services.NewApifyService(apifyAPIToken)
+	if err != nil {
+		logger.Error(ctx, "Error: failed to initialize apify service:", zap.Error(err))
+		os.Exit(1)
+	}
+
+	socialPostRawRepository := repositories.NewSocialPostRawRepository(supabaseClient)
+	syncDatasetCronjob, err := syncdatabase.NewSyncService(apifyService, supabaseClient, socialPostRawRepository)
+	if err != nil {
+		logger.Error(ctx, "Error: failed to initialize sync dataset cronjob:", zap.Error(err))
+		os.Exit(1)
+	}
+
+	classifySocialPostCronjob := classify.NewClassifySocialPost(socialPostRawRepository)
+
+	go func(ctx context.Context) {
+		for {
+			time.Sleep(1 * time.Hour)
+			syncDatasetCronjob.SyncAllDatasets(ctx)
+		}
+	}(ctx)
+
+	go func(ctx context.Context) {
+		for {
+			classifySocialPostCronjob.ClassifySocialPost(ctx)
+			time.Sleep(1 * time.Hour)
+		}
+	}(ctx)
 
 	router := gin.Default()
 

@@ -65,6 +65,9 @@ func Init(enableDebug bool) {
 
 // WithRequestID creates a logger with the requestID field
 func WithRequestID(ctx context.Context) *zap.Logger {
+	if log == nil {
+		Init(false)
+	}
 	requestID, ok := ctx.Value(RequestIDKey).(string)
 	if !ok || requestID == "" {
 		return log
